@@ -2,10 +2,18 @@
           "esri/map", 
           "esri/dijit/Scalebar",
           "esri/layers/WebTiledLayer",
-          "./js/bootstrapmap.js", 
+
+          "app/bootstrapmap",
+        <% if (!useJQuery) { %>
+          "dojo/query", 
+          "dojo/touch",
+
+          "bootstrap/Collapse", 
+          "bootstrap/Dropdown",
+        <% } %>
           "dojo/domReady!"], 
-          function(Map, Scalebar, WebTiledLayer, BootstrapMap) {
-            <!-- Get a reference to the ArcGIS Map class -->
+          function(Map, Scalebar, WebTiledLayer, BootstrapMap<%= (useJQuery) ? '' : ', query, touch' %>) {
+            // Get a reference to the ArcGIS Map class
             var map = BootstrapMap.create("mapDiv",{
               basemap:'gray',
               center:[-117.1,33.6],
@@ -29,8 +37,13 @@
               }
             };
 
+          <% if (useJQuery) { %>
             $(document).ready(function(){
               $("#basemapList li").click(function(e) {
+          <% } else { %>
+            query("#basemapList li").on(touch.press, function(e) {
+                e.preventDefault();
+          <% } %>
                 var l, options;
                 clearBaseMap(map);
                 switch (e.target.text) {
@@ -89,5 +102,5 @@
                     break;
                 }
               });
-            });
+          <%= (useJQuery) ? '});' : '' %>
         });

@@ -36,6 +36,13 @@ var BootmapGenerator = yeoman.generators.Base.extend({
         message: 'What is your github account? (for package.json)'
       },
       {
+        name: 'jsFramework',
+        type: 'list',
+        message: 'Which JS framework do you want to use for Bootstrap?',
+        choices: ['Dojo', 'jQuery'],
+        default: 'Dojo'
+      },
+      {
         name: 'themeStyle',
         message: 'Theme style? (dark | light)',
         default: 'dark'
@@ -51,28 +58,32 @@ var BootmapGenerator = yeoman.generators.Base.extend({
         this.navClass = 'navbar-default';
       } 
       this.gitHubAccount = props.gitHubAccount;
+      this.useJQuery = (props.jsFramework === 'jQuery');
       done();
     }.bind(this));
   },
 
   app: function () {
+    // NOTE: this is needed b/c _app.js has ES6 style interpolation delimiters
+    // see: https://github.com/lodash/lodash/issues/399
+    this._.templateSettings.interpolate = /<%=([\s\S]+?)%>/g;
     this.mkdir('css');
     this.mkdir('js');
     this.template('_package.json', 'package.json');
     this.template('_index.html', 'index.html');
-
+    this.directory('css', 'css');
+    this.template('js/_config.js', 'js/config.js');
+    this.template('js/_app.js', 'js/app.js');
   },
 
   projectfiles: function () {
-    this.directory('css', 'css');
-    this.directory('js', 'js');
     this.copy('gitignore', '.gitignore');
     this.copy('gruntfile.js', 'gruntfile.js');
     this.copy('license.txt', 'license.txt');
     this.template('_README.md', 'README.md');
-  }, 
+  },
 
-  bootstrapFiles: function() {
+  bootstrapMapFiles: function() {
     var cb = this.async();
     this.remote('Esri', 'bootstrap-map-js', 'master', function (err, remote) {
       if (err) {
